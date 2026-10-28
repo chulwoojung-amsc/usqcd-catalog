@@ -102,7 +102,7 @@ the NERSC python module). `requirements.txt` is the same dependency list for
 
 | scripts | need |
 |---|---|
-| hpss_inventory, build_records, hpss_select, untar_manifest, lime_hmc_params | stdlib only |
+| hpss_inventory, build_records, hpss_select, untar_manifest, lime_hmc_params, nersc_header | stdlib only |
 | declare_records, retrieve_records, attach_checksums | metacat-client |
 | globus_transfer | globus-cli for `--submit` / `--status` |
 | htar_members, reduce_corrs, merge_corrs | h5py + numpy (`.[reduce]`, or NERSC `module load python`) |
@@ -298,6 +298,8 @@ scripts/                registry: register_ensemble, add_stream, update_ensemble
                         which the others call and CI can run with --check);
                         the four catalog steps + catalog_common.py (+ attach_checksums.py,
                         lime_hmc_params.py to read HMC parameters out of a LIME header,
+                        nersc_header.py to read a NERSC-format gauge config header (volume,
+                        ensemble id/label, trajectory, plaquette; local or hpss:),
                         sprop_members.py to read what propagator archives hold from their htar
                         indexes, survey_listing.py to summarise a listing), the three data-movement
                         steps hpss_select / globus_transfer / untar_manifest, and the three

@@ -1,0 +1,84 @@
+# RBC/UKQCD 48I physical-point ensemble, on BNL HPSS.
+#     python3 scripts/register_ensemble.py my_ensemble.toml --dry-run
+#     python3 scripts/register_ensemble.py my_ensemble.toml
+# All '#' comments are KEPT as [ensemble] provenance in the catalog.
+#
+# Physics below is read straight out of the HPSS path (provenance), not memory:
+#   .../MDWF/2+1f/48nt96/IWASAKI/b2.13/ls24b+c2/M1.8/ms0.0362/mu0.00078/rhmc_H_R_G/archived
+#   MDWF -> Mobius DWF | 2+1f -> Nf=2+1 | 48nt96 -> 48^3x96 | IWASAKI gauge
+#   b2.13 -> beta=2.13 | ls24b+c2 -> Ls=24, b5+c5=2 | M1.8 -> M5=1.8
+#   ms0.0362 -> am_s=0.0362 | mu0.00078 -> am_l=0.00078 | files ckpoint_lat.<traj>
+# These parameters identify the RBC/UKQCD "48I" physical-point ensemble
+# (a^-1 ~ 1.730 GeV; Blum et al., Phys. Rev. D 93, 074505, arXiv:1411.7017).
+# TODO items are NOT in the path - fill from the HMC input / the paper.
+
+[ensemble]
+# From NERSC header ENSEMBLE_LABEL, sanitised to the name charset (+ -> p), with
+# the trailing generation-algorithm token (rhmc_H_R_G) dropped - that describes
+# the stream, not the ensemble, so it becomes the stream label below.
+name = "MDWF_2p1f_48nt96_IWASAKI_b2.13_ls24bpc2_M1.8_ms0.0362_mu0.00078"   # permanent once registered
+display_name = "RBC/UKQCD 48I: 2+1f Mobius DWF 48^3x96, Iwasaki beta=2.13, physical point"
+collaboration = "RBC/UKQCD"
+generated_by = "RBC"                               # NERSC header CREATOR
+machine = "ALCF Mira (BG/Q)"                       # NERSC header CREATOR_HARDWARE = ALCF_MIRA
+year = 2013                                        # NERSC header CREATION_DATE (Apr 2013)
+code = "TODO generation code + version (RBC on Mira ~2013; confirm, e.g. CPS/BFM)"
+storage = "bnl_hpss"                               # [storage.bnl_hpss] in catalog.toml
+description = """\
+RBC/UKQCD 2+1-flavor Mobius domain-wall fermion ensemble at the physical point: \
+48^3 x 96 lattice, Iwasaki gauge action at beta = 2.13 (a^-1 ~ 1.73 GeV), \
+Ls = 24 with Mobius scale b5+c5 = 2 and domain-wall height M5 = 1.8, bare masses \
+am_l = 0.00078 and am_s = 0.0362, generated with RHMC. Configurations stored as \
+NERSC-format ckpoint_lat.<trajectory> files."""
+
+[lqcd]
+# RBC's own identifiers, from the NERSC config header (provenance / cross-ref).
+ensemble_id = "48I"
+ensemble_label = "MDWF_2+1f_48nt96_IWASAKI_b2.13_ls24b+c2_M1.8_ms0.0362_mu0.00078_rhmc_H_R_G"
+nflavors = 3
+beta = 2.13
+Nx = 48
+Ny = 48
+Nz = 48
+Nt = 96
+volume = [48, 48, 48, 96]
+
+[lqcd.action]
+# fermion is NOT Wilson-like, so no (meaningless) Wilson kappa is derived -
+# the bare am_l/am_s below stand on their own.
+gauge = "Iwasaki"          # lqcd.action.gauge (schema.md:119)
+fermion = "mobius_dwf"
+anisotropic = false
+
+[lqcd.dwf]
+# Domain-wall fifth-dimension parameters; schema's canonical home is lqcd.dwf.*
+# (schema.md:28), flattened to lqcd.dwf.Ls etc.
+Ls = 24
+M5 = 1.8
+b5_plus_c5 = 2.0           # from path (ls24b+c2). For 48I the standard split is
+                           # b5 = 1.5, c5 = 0.5 (Shamir-equivalent); uncomment to
+                           # record it once confirmed from the HMC input:
+# b5 = 1.5
+# c5 = 0.5
+
+[lqcd.mass]                # bare DWF input masses (am)
+light = 0.00078
+strange = 0.0362
+
+[lqcd.hmc]
+tau0 = 0.0                 # TODO trajectory length (not in the path)
+save_interval = 0          # TODO trajectories between saved configs (not in the path)
+
+# One stream, labelled by its generation algorithm (the rhmc_H_R_G token from the
+# header/folder). dir is relative to the BNL HPSS root
+# (/lhsm/lqcd-long-term/archive/RBC/qcddata/). 221 configs, 839 GB.
+[streams.rhmc_H_R_G]
+dir = "MDWF/2+1f/48nt96/IWASAKI/b2.13/ls24b+c2/M1.8/ms0.0362/mu0.00078/rhmc_H_R_G/archived"
+
+# Config names are ckpoint_lat.<trajectory> (survey: "ckpoint_lat.N"); the
+# NPLQCD/Chroma default rule would not match, so match them explicitly.
+[[files]]
+pattern = '^(?:.*/)?ckpoint_lat\.(?P<trajectory>\d+)$'
+kind = "gauge_config"
+format = "application/x-nersc-gauge"   # confirmed from header: DATATYPE=4D_SU3_GAUGE (2-row), FLOATING_POINT=IEEE64LITTLE
+description = "RBC/UKQCD Mobius DWF gauge configuration (NERSC format, 2-row, IEEE64LITTLE)."
