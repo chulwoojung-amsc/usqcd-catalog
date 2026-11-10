@@ -38,6 +38,15 @@ globus_label = "NERSC HPSS"
 hsi = "hsi"
 root = "/home/w/wdetmold/clover-iso"
 
+[storage.bnl_hpss]
+system = "hpss"
+site = "BNL"
+globus_collection = "12782fb1-a599-4f18-b0fb-2e849681e214"
+globus_label = "BNL SDCC"
+# Listing tool and the root under which ensemble stream directories live.
+hsi = "hsi"
+root = "/lhsm/lqcd-long-term/archive/RBC/qcddata/"
+
 # Other places LQCD data lives or can be backed up to (from
 # amsc_lqcd_globus_notes.txt). Not used by the metadata steps; listed so a
 # transfer step can refer to them by key and so the UUIDs live in one place.
