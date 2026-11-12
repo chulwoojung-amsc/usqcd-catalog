@@ -221,7 +221,21 @@ def main() -> int:
             declared += [f["name"] for f in batch]
             print(f"  {'[dry-run] validated' if args.dry_run else 'declared'} {i + len(batch)}/{len(new)}")
         except Exception as e:
-            msg = f"batch {i // args.batch_size}: {type(e).__name__}: {e}"
+            # Some metacat-client versions raise WebAPIError on a 2xx declare
+            # response: the MetaCat server returns 202 Accepted (with the declared
+            # files + assigned fids in e.Data), but the client only treats 200 as
+            # success. The declaration actually succeeded, so accept any 2xx.
+            sc = getattr(e, "StatusCode", None)
+            if isinstance(sc, int) and 200 <= sc < 300:
+                declared += [f["name"] for f in batch]
+                print(f"  {'[dry-run] validated' if args.dry_run else 'declared'} "
+                      f"{i + len(batch)}/{len(new)} (HTTP {sc})")
+                continue
+            try:
+                detail = str(e)  # WebAPIError.__str__ is itself buggy in some versions
+            except Exception:
+                detail = f"StatusCode={sc} Body={str(getattr(e, 'Body', ''))[:300]}"
+            msg = f"batch {i // args.batch_size}: {type(e).__name__}: {detail}"
             errors.append(msg)
             print(f"  ERROR {msg}", file=sys.stderr)
             break  # stop on first failure; re-run picks up where we left off
